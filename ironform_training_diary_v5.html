@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111310">
+  <title>IRONFORM — тренировочный дневник</title>
+  <style>
+    :root {
+      --ink:#111310; --paper:#f2eedf; --panel:#1a1d19; --line:#34392f;
+      --lime:#d7ff4f; --coral:#ff765f; --ice:#b7e8ef; --muted:#9ea696;
+      --safe-bottom:env(safe-area-inset-bottom, 0px);
+    }
+    *{box-sizing:border-box}
+    html{background:var(--ink);color:var(--paper);scroll-behavior:smooth}
+    body{margin:0;min-height:100vh;background:
+      radial-gradient(circle at 12% 0%,rgba(215,255,79,.09),transparent 28rem),
+      radial-gradient(circle at 100% 22%,rgba(255,118,95,.07),transparent 24rem),var(--ink);
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.45}
+    button,input{font:inherit}
+    button,a{touch-action:manipulation}
+    button{color:inherit}
+    .shell{width:min(100%,720px);margin:auto;padding:18px 14px calc(28px + var(--safe-bottom))}
+    .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--lime)}
+    h1,h2,h3,.display{font-family:"Arial Narrow","Roboto Condensed",Impact,sans-serif;text-transform:uppercase;letter-spacing:-.025em;line-height:.92;margin:0}
+    h1{font-size:clamp(47px,14vw,88px);max-width:8ch}
+    h2{font-size:35px}
+    h3{font-size:24px}
+    p{margin:0}
+    .hero{padding:18px 4px 24px;position:relative}
+    .hero:after{content:"04";position:absolute;right:3px;top:6px;font:900 72px/1 "Arial Narrow",Impact,sans-serif;color:transparent;-webkit-text-stroke:1px var(--line)}
+    .hero-copy{margin-top:14px;max-width:49ch;color:var(--muted);font-size:13px}
+    .today{margin-top:18px;display:inline-flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:99px;padding:8px 11px;font-size:11px}
+    .today i{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 14px var(--lime)}
+    .grid{display:grid;gap:10px}
+    .workout-card{width:100%;text-align:left;border:1px solid var(--line);background:rgba(26,29,25,.92);padding:16px;border-radius:18px;cursor:pointer;transition:.2s transform,.2s border-color,.2s background;position:relative;overflow:hidden}
+    .workout-card:active{transform:scale(.985)}
+    .workout-card.today-card{border-color:var(--lime)}
+    .workout-card .topline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+    .day{font-size:11px;letter-spacing:.14em;color:var(--muted)}
+    .stimulus{font-size:10px;border-radius:99px;padding:5px 8px;background:var(--lime);color:var(--ink);font-weight:800}
+    .stimulus.moderate{background:var(--ice)}
+    .workout-card .name{font:900 35px/.9 "Arial Narrow",Impact,sans-serif;text-transform:uppercase}
+    .workout-card .note{display:flex;justify-content:space-between;gap:12px;margin-top:12px;color:var(--muted);font-size:11px}
+    .arrow{color:var(--lime);font-size:20px}
+    summary{cursor:pointer;list-style:none}
+    summary::-webkit-details-marker{display:none}
+    .data-strip{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:10px}
+    .tiny-actions{display:flex;gap:7px}
+    .tiny{border:1px solid var(--line);background:transparent;border-radius:9px;padding:8px 9px;cursor:pointer;font-size:10px}
+    .screen{display:none}
+    .screen.active{display:block;animation:in .25s ease-out}
+    @keyframes in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+    .workout-head{position:sticky;top:0;z-index:10;margin:-18px -14px 0;padding:12px 14px 13px;background:rgba(17,19,16,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+    .back{border:0;background:none;padding:7px 7px 7px 0;cursor:pointer;color:var(--lime);font-size:12px}
+    .workout-title-row{display:flex;justify-content:space-between;align-items:end;gap:12px}
+    .workout-sub{color:var(--muted);font-size:10px;text-align:right;max-width:19ch}
+    .section{margin-top:24px}
+    .section-head{display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:end;margin-bottom:10px}
+    .section-number{font:900 39px/.8 "Arial Narrow",Impact,sans-serif;color:transparent;-webkit-text-stroke:1px var(--lime)}
+    .section-meta{font-size:10px;color:var(--muted);margin-top:4px}
+    .exercise{border:1px solid var(--line);background:var(--panel);border-radius:16px;margin-bottom:9px;overflow:hidden}
+    .exercise-main{padding:14px}
+    .exercise-title{display:flex;justify-content:space-between;gap:10px;align-items:start}
+    .exercise-title h3{max-width:16ch}
+    .dose{white-space:nowrap;color:var(--lime);font-size:11px;border:1px solid var(--line);border-radius:8px;padding:5px 7px}
+    .cue{color:var(--muted);font-size:11px;margin-top:8px}
+    .reserve{margin-top:9px;color:var(--coral);font-size:11px}
+    .previous,.next-goal{margin-top:10px;border-radius:10px;padding:9px 10px;font-size:10px}
+    .previous{background:#242821;color:var(--muted)}
+    .next-goal{background:rgba(215,255,79,.11);color:var(--paper);border:1px solid rgba(215,255,79,.25)}
+    .next-goal b{color:var(--lime)}
+    .sets{margin-top:12px;display:grid;gap:7px}
+    .set-row{display:grid;grid-template-columns:23px 1fr 1fr 34px;gap:6px;align-items:center}
+    .set-index{color:var(--muted);font-size:10px;text-align:center}
+    .field{position:relative}
+    .field input{width:100%;min-width:0;height:42px;border:1px solid var(--line);background:var(--ink);color:var(--paper);border-radius:9px;padding:8px 25px 8px 9px;font-size:14px;outline:none}
+    .field input:focus{border-color:var(--lime)}
+    .field span{position:absolute;right:7px;top:14px;font-size:9px;color:var(--muted);pointer-events:none}
+    .done{appearance:none;width:30px;height:30px;margin:0;border:1px solid var(--line);border-radius:9px;background:var(--ink);cursor:pointer;position:relative}
+    .done:checked{background:var(--lime);border-color:var(--lime)}
+    .done:checked:after{content:"✓";position:absolute;inset:3px 0 0;text-align:center;color:var(--ink);font-weight:900}
+    .set-actions{display:flex;gap:6px;margin-top:8px}
+    .set-btn{border:1px solid var(--line);background:transparent;border-radius:8px;padding:7px 9px;color:var(--muted);font-size:10px;cursor:pointer}
+    .details{border-top:1px solid var(--line)}
+    .details>summary{padding:11px 14px;color:var(--ice);font-size:10px}
+    .details>summary:after{content:"ОТКРЫТЬ +";float:right;color:var(--muted)}
+    .details[open]>summary:after{content:"ЗАКРЫТЬ –"}
+    .detail-grid{padding:0 14px 14px;display:grid;gap:10px;font-size:11px;color:var(--muted)}
+    .detail-grid b{display:block;color:var(--paper);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+    .video{display:inline-flex;width:max-content;text-decoration:none;color:var(--ink);background:var(--ice);border-radius:8px;padding:8px 10px;font-weight:800;font-size:10px}
+    .check-row{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:center;margin-top:11px}
+    .finish{margin-top:24px;width:100%;border:0;border-radius:15px;background:var(--lime);color:var(--ink);padding:16px;font-weight:900;cursor:pointer;text-transform:uppercase;letter-spacing:.08em}
+    .finish:active{transform:scale(.99)}
+    .medical-note{margin:12px 0 0;color:var(--muted);font-size:10px;padding:0 3px}
+    .toast{position:fixed;left:50%;bottom:calc(18px + var(--safe-bottom));transform:translate(-50%,20px);opacity:0;background:var(--paper);color:var(--ink);padding:11px 14px;border-radius:10px;z-index:50;font-size:11px;transition:.2s;pointer-events:none;max-width:calc(100vw - 28px);text-align:center}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    .storage-warning{color:var(--coral)}
+    @media(min-width:580px){.grid{grid-template-columns:1fr 1fr}.shell{padding-top:28px}.set-row{grid-template-columns:28px 1fr 1fr 38px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section id="home" class="screen active">
+      <header class="hero">
+        <div class="eyebrow">Personal training log / 2026</div>
+        <h1>IRON<br>FORM</h1>
+        <p class="hero-copy">Четыре тренировки. Два разных стимула. Только прошлый результат и понятная следующая цель.</p>
+        <div class="today"><i></i><span id="todayText">Сегодня — восстановление</span></div>
+      </header>
+      <div id="workoutGrid" class="grid"></div>
+      <footer class="data-strip">
+        <span id="storageText">Записи остаются только в этом браузере.</span>
+        <div class="tiny-actions">
+          <button id="exportBtn" class="tiny" type="button">Скачать копию</button>
+          <button id="importBtn" class="tiny" type="button">Восстановить</button>
+          <input id="importFile" type="file" accept="application/json" hidden>
+        </div>
+      </footer>
+    </section>
+
+    <section id="workout" class="screen" aria-live="polite">
+      <header class="workout-head">
+        <button id="backBtn" class="back" type="button">← Все тренировки</button>
+        <div class="workout-title-row">
+          <h2 id="workoutTitle"></h2>
+          <p id="workoutSub" class="workout-sub"></p>
+        </div>
+      </header>
+      <div id="workoutBody"></div>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+
+  <script>
+  (() => {
+    'use strict';
+    const video = q => `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+
+    const posture = [
+      {id:'thoracic-extension',name:'Разгибание грудного отдела на ролле',dose:'1 × 6–8',cue:'Двигай верх спины, не поясницу.',technique:'Ролл поперёк спины под нижним краем лопаток. Поддерживай голову, выдохни, мягко разогни грудной отдел над роллом и вернись. Сделай 2–3 небольших смещения ролла вверх.',focus:'Рёбра не выпячиваются, таз остаётся неподвижным.',breath:'Выдох в разгибании, спокойный вдох при возврате.',mistakes:'Большой прогиб в пояснице; давление роллом на шею; быстрые пружинящие движения.',replacement:'Разгибание грудного отдела сидя на скамье с локтями на опоре.',video:video('thoracic extension foam roller technique')},
+      {id:'wall-slide',name:'Скольжение руками по стене',dose:'1 × 10–12',cue:'Предплечья давят в стену, лопатки свободно вращаются вверх.',technique:'Встань лицом к стене, предплечья на ней. Слегка толкай стену от себя и скользи руками вверх только до высоты, где не теряешь положение рёбер.',focus:'Длинная шея, мягкое движение лопаток вверх и вокруг грудной клетки.',breath:'Спокойный выдох при подъёме, вдох при опускании.',mistakes:'Пожимать плечами к ушам; прогибаться; насильно сводить лопатки.',replacement:'Скольжение по стене с мини-лентой или выталкивание рукой на блоке.',video:video('serratus wall slide proper form')},
+      {id:'pushup-plus',name:'Отжимание с дополнительным отталкиванием',dose:'1 × 10–15',cue:'В верхней точке ещё раз оттолкни пол.',technique:'Из упора лёжа или с колен выполни отжимание. Не сгибая локти вверху, мягко оттолкни пол и позволь лопаткам разойтись, затем вернись в обычную верхнюю позицию.',focus:'Движение происходит лопатками без округления поясницы.',breath:'Выдох при дополнительном отталкивании, вдох при возврате.',mistakes:'Сгибать локти в дополнительной фазе; проваливаться между лопатками; задирать подбородок.',replacement:'Выталкивание рукой на блоке или с резинкой.',video:video('push up plus serratus technique')},
+      {id:'y-raise',name:'Диагональный подъём рук на блоке или с резинкой',dose:'1 × 12–15',cue:'Очень лёгкий вес, руки идут по диагонали вверх.',technique:'Возьми нижние блоки или резинку. Большие пальцы смотрят вверх. Подними прямые руки по диагонали до комфортной высоты, не компенсируя поясницей.',focus:'Нижняя трапеция, плавное вращение лопатки вверх.',breath:'Выдох на подъёме, вдох на опускании.',mistakes:'Слишком большой вес; рывок корпусом; подъём через боль.',replacement:'Диагональный подъём рук лёжа грудью на наклонной скамье.',video:video('cable Y raise lower trap technique')},
+      {id:'face-pull',name:'Тяга каната к лицу или обратная разводка',dose:'1 × 15–20',cue:'Лёгкое движение задней дельты, без рывка.',technique:'Тяни канат к уровню глаз, разводя концы в стороны. Остановись, когда плечо и лопатка остаются комфортными; медленно верни вес.',focus:'Задняя дельта и середина спины, но лопатки не зажимай намертво.',breath:'Выдох на тяге, вдох на возврате.',mistakes:'Большой вес; локти сильно выше плеч; запрокидывание корпуса.',replacement:'Обратная разводка в тренажёре или с гантелями грудью на скамье.',video:video('face pull proper form shoulder friendly')}
+    ];
+
+    const stretch = [
+      {id:'pec-stretch',name:'Растяжка грудных',dose:'2 × 30–40 сек/сторона',cue:'Рука немного ниже плеча, без выкручивания сустава.',technique:'Поставь предплечье на стойку или дверной проём и медленно поверни корпус от руки до мягкого натяжения в груди.',focus:'Тянется грудная мышца, передняя часть плеча не болит.',breath:'Длинный спокойный выдох, без задержки дыхания.',mistakes:'Рука слишком высоко; агрессивно проворачивать плечо; терпеть острую боль.',replacement:'Лёжа на ролле с руками в форме низкой буквы T.',video:video('doorway pec stretch shoulder safe')},
+      {id:'lat-stretch',name:'Растяжка широчайших',dose:'2 × 30–40 сек',cue:'Рёбра остаются над тазом.',technique:'Ладони на стойке или скамье, отведи таз назад и опусти грудь между руками до мягкого натяжения по бокам спины.',focus:'Не создавай натяжение прогибом в пояснице.',breath:'Медленно выдыхай и чуть углубляй положение.',mistakes:'Проваливаться в пояснице; давить плечи через дискомфорт.',replacement:'Односторонняя растяжка широчайшей на верхнем блоке.',video:video('lat stretch bench proper form')},
+      {id:'open-book',name:'Повороты грудного отдела лёжа на боку',dose:'1 × 8/сторона',cue:'Колени вместе, вращается грудной отдел.',technique:'Ляг на бок, тазобедренные и колени согнуты. Руки перед собой. Верхней рукой раскрой грудную клетку назад, следи глазами за ладонью, затем вернись.',focus:'Плавная ротация верхней части спины.',breath:'Выдох при раскрытии, вдох при возврате.',mistakes:'Разводить колени; тянуть рукой через предел; двигаться рывком.',replacement:'Повороты грудного отдела на четвереньках.',video:video('open book thoracic rotation technique')}
+    ];
+
+    const ex = (id,name,sets,min,max,reserve,inc,cue,technique,focus,breath,mistakes,replacement,query) => ({id,name,sets,min,max,reserve,inc,cue,technique,focus,breath,mistakes,replacement,video:video(query)});
+
+    const workouts = {
+      upperHeavy:{day:2,dayName:'Вторник',short:'Верх A',title:'Верх — тяжёлый',type:'heavy',duration:'75–88 минут',explain:'Базовые движения 5–8 повторений: вес ощутимый, но без отказа и без проверки максимума. Это день навыка силы.',main:[
+        ex('bench','Жим штанги лёжа',3,5,8,'В первом подходе оставь 3 чистых повтора, в последнем — не меньше 2.',2.5,'Средний хват, лопатки устойчиво на скамье, без перекоса вправо.','Стопы устойчивы, лёгкий естественный прогиб. Опусти штангу контролируемо к нижней части груди, предплечья близки к вертикали. Жми симметрично.','Правое и левое плечо движутся одинаково; хват примерно 1–1,5 ширины плеч.','Вдох и фиксация перед опусканием, выдох после прохождения трудной точки.','Широкий хват; локти под 90° к корпусу; правое плечо уходит вперёд; отбив от груди.','Жим гантелей нейтральным хватом или chest press с нейтральными рукоятями.','bench press shoulder friendly medium grip technique'),
+        ex('chest-row-heavy','Тяга с упором грудью',3,6,10,'Оставь 2–3 чистых повтора в каждом подходе.',2.5,'Дай лопаткам уйти вперёд внизу и верни их тягой.','Грудь всё время на опоре. Начни из полного контролируемого растяжения, тяни локти назад к нижним рёбрам и медленно опускай.','Середина спины работает без помощи поясницы.','Выдох на тяге, вдох при опускании.','Отрывать грудь; дёргать вес; намертво держать лопатки сведёнными весь подход.','Горизонтальная тяга в тренажёре с упором грудью.','chest supported row proper form scapula movement'),
+        ex('incline-db','Наклонный жим гантелей нейтральным хватом',2,8,12,'Оставь 2–3 чистых повтора; никакого отказа.',2,'Скамья 20–30°, ладони смотрят друг на друга.','Сведи гантели над грудью, опускай локти по комфортной дуге примерно в 30–45° от корпуса. Не ищи глубину ценой положения плеча.','Грудь и трицепс; правое плечо остаётся спокойно на скамье.','Вдох вниз, выдох вверх.','Высокий наклон; локти широко; глубокое опускание через дискомфорт.','Одноручный cable press или нейтральный chest press.','neutral grip incline dumbbell press shoulder friendly'),
+        ex('pulldown','Тяга верхнего блока нейтральным хватом',3,8,12,'Оставь 2 повтора в запасе.',2.5,'Тяни локти к бокам, не отклоняй корпус назад.','Сядь устойчиво, слегка подай грудь вверх без прогиба поясницы. Опусти рукоять к верхней части груди, затем полностью контролируй подъём.','Широчайшие и нижняя часть лопаток, шея расслаблена.','Выдох вниз, вдох вверх.','Раскачка; тяга за голову; короткая амплитуда.', 'Подтягивания с резиной или одноручная тяга верхнего блока.','neutral grip lat pulldown proper form'),
+        ex('lateral','Подъём руки в сторону на блоке',2,12,20,'Оставь 1–2 чистых повтора.',1,'Веди локоть в сторону, не поднимай плечо к уху.','Встань боком к нижнему блоку, рука слегка согнута. Подними до комфортной высоты и опусти медленно.', 'Средняя дельта без рывка и компрессии плеча.','Выдох вверх, вдох вниз.','Большой вес; раскачка; движение через боль.', 'Подъём гантелей в сторону сидя.','single arm cable lateral raise proper form'),
+        ex('triceps','Разгибание рук с канатом',2,10,15,'Оставь 1–2 чистых повтора.',2.5,'Локти возле корпуса, плечи не двигаются.','Разогни локти до конца без рывка, слегка разведи канат внизу и контролируемо верни.', 'Трицепс, стабильный корпус.','Выдох вниз, вдох вверх.','Качать плечом; наклоняться всем весом; разводить локти.', 'Одноручное разгибание на блоке.','rope triceps pushdown proper form'),
+        ex('curl','Сгибание рук на наклонной скамье',2,10,15,'Оставь 1–2 чистых повтора.',2,'Плечо неподвижно, локоть смотрит вниз.','Ляг на наклонную скамью, руки свободно опущены. Согни локти без выведения плеча вперёд, опусти медленно.', 'Бицепс в длинной позиции.','Выдох вверх, вдох вниз.','Рывок; плечо уходит вперёд; переразгибать локоть под нагрузкой.', 'Сгибание на нижнем блоке.','incline dumbbell curl proper form')
+      ]},
+      lowerHeavy:{day:3,dayName:'Среда',short:'Низ A',title:'Низ — тяжёлый',type:'heavy',duration:'72–86 минут',explain:'Главное движение — присед на 5–8 повторений. Для новичковой зоны «тяжёлый» означает техничный и уверенный, а не предельный.',main:[
+        ex('highbar-squat','Присед со штангой или безопасным грифом',3,5,8,'Оставь 3 чистых повтора; техника важнее веса.',5,'Стопа полностью на полу, колени следуют за носками.','Вдохни и собери корпус, сядь между бёдер до стабильной глубины. Сохраняй давление всей стопой и встань без завала корпуса.', 'Одинаковая траектория каждого повтора и уверенная глубина.','Вдох и фиксация наверху, выдох после трудной части подъёма.','Резко проваливаться вниз; пятки отрываются; колени схлопываются; добавлять вес при нестабильной технике.','Присед с безопасным грифом, гакк-присед или присед с гирей у груди.','high bar squat beginner proper form'),
+        ex('rdl','Румынская тяга',2,8,10,'Оставь 3 чистых повтора.',5,'Таз назад, штанга скользит близко к ногам.','Слегка согни колени, отведи таз назад и опускай штангу до точки, где сохраняется контроль корпуса и чувствуется задняя поверхность бедра. Встань движением таза вперёд.', 'Освоение hip hinge без поиска максимальной глубины.','Вдох и фиксация наверху, выдох после подъёма.','Приседать вместо наклона; отводить штангу от ног; округляться ради глубины.', 'RDL с гантелями или cable pull-through.','Romanian deadlift hip hinge beginner form'),
+        ex('legpress','Жим ногами',3,10,15,'Оставь 2–3 чистых повтора.',5,'Опускай платформу только пока таз остаётся на спинке.','Поставь стопы на удобной ширине. Сними упоры, опусти контролируемо, колени следуют за стопами, выжми без жёсткого щелчка коленями.', 'Квадрицепс и ягодичные, стабильная поясница.','Вдох вниз, выдох вверх.','Подкручивать таз; сводить колени; выпрямлять колени ударом.', 'Hack squat или split squat.','leg press proper form lower back'),
+        ex('legcurl','Сгибание ног сидя',3,10,15,'Оставь 1–2 чистых повтора.',2.5,'Таз прижат, движение только в колене.','Настрой валик над пятками, ось тренажёра совпадает с коленом. Согни ноги, задержись на мгновение и медленно разогни.', 'Задняя поверхность бедра в контролируемой амплитуде.','Выдох при сгибании, вдох при разгибании.','Отрывать таз; бросать вес; сокращать амплитуду.', 'Сгибание ног лёжа.','seated leg curl proper form'),
+        ex('calf-standing','Икры стоя',3,8,12,'Оставь 1–2 чистых повтора.',5,'Пауза внизу и наверху, без пружины.','Опустись в комфортное растяжение, поднимись максимально высоко на носки, задержись и вернись медленно.', 'Полная управляемая амплитуда.','Выдох вверх, вдох вниз.','Пружинить; сгибать колени; делать половину амплитуды.', 'Икры в leg press.','standing calf raise full range proper form'),
+        ex('deadbug','Поочерёдное опускание руки и ноги лёжа',2,8,12,'На сторону; останавливайся до потери контроля.',0,'Поясница спокойно касается пола, рёбра не раскрываются.','Лёжа подними руки и ноги, согнув колени. Медленно выпрямляй противоположные руку и ногу, сохраняя корпус неподвижным.', 'Контроль корпуса для приседа и тяги.','Длинный выдох при выпрямлении, вдох в центре.','Прогибаться; спешить; задерживать дыхание.', 'Удержание корпуса с сопротивлением вращению на блоке.','dead bug exercise proper form breathing')
+      ]},
+      upperModerate:{day:6,dayName:'Суббота',short:'Верх B',title:'Верх — умеренный',type:'moderate',duration:'73–87 минут',explain:'Больше повторений и меньше суставная нагрузка. Это полноценный стимул роста, а не «бесполезный лёгкий день».',main:[
+        ex('pullup','Подтягивания нейтральным хватом',3,6,10,'Оставь 2–3 чистых повтора; не иди до отказа.',2.5,'Начни из спокойного виса и веди локти вниз.','Используй нейтральные рукояти, если есть. Подтяни грудь к рукоятям без раскачки, затем опустись контролируемо до комфортного виса.', 'Широчайшие, симметричная работа плеч.', 'Выдох вверх, вдох вниз.','Киппинг; вытягивать подбородок; бросать тело вниз.', 'Нейтральная тяга верхнего блока.','neutral grip pull up proper form'),
+        ex('neutral-db-flat','Жим гантелей лёжа нейтральным хватом',3,8,12,'Оставь 3 повтора сначала и не меньше 2 в конце.',2,'Ладони друг к другу, локти ближе к корпусу.','Установи лопатки устойчиво, опускай гантели по удобной дуге. Останови амплитуду до ухода плеча вперёд, выжми симметрично.', 'Безболезненная траектория и контроль правого плеча.','Вдох вниз, выдох вверх.','Локти широко; слишком глубокое опускание; правое плечо отрывается.', 'Нейтральный chest press или одноручный cable press.','neutral grip dumbbell bench press shoulder friendly'),
+        ex('onearm-row','Одноручная тяга нижнего блока',3,10,15,'Оставь 2 чистых повтора.',2.5,'Позволь лопатке потянуться вперёд и верни локоть назад.','Сядь ровно, начни с контролируемого вытяжения руки. Тяни локоть к тазу без вращения корпуса, затем плавно отпусти плечо вперёд.', 'Каждая сторона работает отдельно; сравни контроль справа и слева.','Выдох на тяге, вдох на возврате.','Разворачивать корпус; пожимать плечом; дёргать вес.', 'Одноручная тяга с упором грудью.','single arm cable row scapula movement'),
+        ex('landmine','Одноручный жим конца штанги',3,8,12,'Оставь 3 повтора; только безболезненная амплитуда.',2.5,'Жми по диагонали и позволь лопатке вращаться вверх.','Встань в разножку, держи конец штанги одной рукой. Жми вперёд-вверх без прогиба и мягко потянись рукой в конечной точке.', 'Передняя зубчатая мышца и жим над головой в более комфортной траектории.','Выдох на жиме, вдох вниз.','Запирать лопатку назад; прогибаться; поднимать через боль.', 'Одноручный жим на блоке вперёд-вверх.','single arm landmine press proper form serratus'),
+        ex('rear-delt','Обратная разводка с упором грудью',3,12,20,'Оставь 1–2 чистых повтора.',1,'Лёгкий вес, руки расходятся в стороны.', 'Ляг грудью на наклонную скамью. Слегка согни локти, разведи руки до линии корпуса и медленно опусти.', 'Задняя дельта и середина спины без поясницы.','Выдох при разведении, вдох вниз.','Тянуть плечи к ушам; слишком тяжёлые гантели; сводить лопатки любой ценой.', 'Обратная разводка в тренажёре.','chest supported rear delt fly proper form'),
+        ex('overhead-triceps','Разгибание трицепса над головой на блоке',2,10,15,'Оставь 2 чистых повтора.',2.5,'Выбирай только комфортное положение плеч.', 'Встань спиной к блоку, канат за головой, локти направлены вперёд. Разогни руки без движения плеч.', 'Длинная головка трицепса; рёбра не выпячиваются.','Выдох на разгибании, вдох назад.','Прогибаться; разводить локти; терпеть плечевой дискомфорт.', 'Одноручное разгибание вниз.','cable overhead triceps extension proper form'),
+        ex('hammer-curl','Молотковые сгибания',2,10,15,'Оставь 1–2 чистых повтора.',2,'Ладони друг к другу, плечи неподвижны.','Сгибай гантели без раскачки, удерживая нейтральный хват. Медленно опускай до почти полного разгибания.', 'Брахиалис и предплечье.','Выдох вверх, вдох вниз.','Качать корпусом; уводить локти вперёд; бросать вес.', 'Молотковые сгибания с канатом.','hammer curl proper form')
+      ]},
+      lowerModerate:{day:0,dayName:'Воскресенье',short:'Низ B',title:'Низ — техника + объём',type:'moderate',duration:'75–89 минут',explain:'Становая здесь — обучение движению, а не тяжёлый тест. Остальная работа даёт ногам умеренный гипертрофический стимул.',main:[
+        ex('deadlift','Классическая становая — техника',4,3,5,'Оставь минимум 3–4 чистых повтора. Каждый повтор начинай заново.',5,'Штанга над серединой стопы, зафиксируй корпус и толкни пол ногами.','Поставь стопы под тазом, штанга близко к голени. Возьмись за гриф, приблизь голени, собери корпус и плавно создай натяжение. Подними штангу вдоль ног. Опусти под контролем и полностью перестройся перед следующим повтором.', 'Одинаковый старт, штанга близко, без рывка. Сними видео сбоку для самопроверки.', 'Глубокий вдох и фиксация перед каждым повтором; выдох после завершения.', 'Рвать штангу; отбивать повторы; гнаться за весом; продолжать при потере исходной позиции.', 'Тяга с блоков, trap-bar deadlift или kettlebell deadlift.','conventional deadlift beginner setup step by step'),
+        ex('hack','Гакк-присед',3,10,15,'Оставь 2–3 чистых повтора.',5,'Колени следуют за носками, таз на спинке.', 'Поставь стопы так, чтобы пятки не отрывались. Опускайся контролируемо до устойчивой глубины и выжми платформу всей стопой.', 'Квадрицепс, стабильная траектория без баланса штанги.','Вдох вниз, выдох вверх.','Пружинить внизу; колени внутрь; блокировать колени ударом.', 'Жим ногами или присед с гирей у груди и пятками на подставке.','hack squat proper form hypertrophy'),
+        ex('bulgarian','Болгарский сплит-присед',2,8,12,'Оставь 2–3 чистых повтора на каждую ногу.',2,'Передняя стопа полностью на полу, корпус стабилен.','Поставь заднюю ногу на невысокую опору. Опустись вертикально вниз в комфортной стойке, толкни пол передней ногой и сохрани колено по линии стопы.', 'Симметрия ног и контроль таза.', 'Вдох вниз, выдох вверх.','Слишком узкая стойка; отталкиваться задней ногой; заваливать колено.', 'Обратный выпад или split squat без опоры.','Bulgarian split squat beginner proper form'),
+        ex('legextension','Разгибание ног',2,12,15,'Оставь 1–2 чистых повтора.',2.5,'Пауза наверху, опускай вес медленно.', 'Совмести колено с осью тренажёра, валик над голеностопом. Разогни ноги до комфортной точки, задержись и вернись контролируемо.', 'Квадрицепс без рывка тазом.', 'Выдох вверх, вдох вниз.','Бросать вес; отрывать таз; начинать с чрезмерной нагрузки.', 'Spanish squat или reverse Nordic в облегчённой амплитуде.','leg extension machine proper setup'),
+        ex('legcurl-sun','Сгибание ног лёжа / сидя',2,10,15,'Оставь 1–2 чистых повтора.',2.5,'Таз неподвижен, полная контролируемая амплитуда.', 'Настрой тренажёр под суставы. Согни ноги без отрыва таза, коротко задержись и медленно разогни.', 'Задняя поверхность бедра после технической тяги.', 'Выдох при сгибании, вдох при возврате.','Рывок поясницей; короткая амплитуда; бросать вес.', 'Сгибание ног с фитболом.','lying leg curl proper form'),
+        ex('calf-seated','Икры сидя',3,12,20,'Оставь 1–2 чистых повтора.',5,'Полная пауза в растяжении и сокращении.', 'Колени под валиком, подушечки стоп на платформе. Опусти пятки, задержись, поднимись максимально высоко и снова задержись.', 'Камбаловидная мышца, без пружины.', 'Выдох вверх, вдох вниз.','Быстрые пружины; половина амплитуды; смещение стоп.', 'Икры стоя или в leg press.','seated calf raise full range proper form')
+      ]}
+    };
+
+    const STORE_KEY='ironform_v5_data';
+    let memory={sessions:[],drafts:{},checks:{}};
+    let storageOK=true;
+    const load=()=>{try{const raw=localStorage.getItem(STORE_KEY);return raw?Object.assign(memory,JSON.parse(raw)):memory}catch(e){storageOK=false;return memory}};
+    let state=load();
+    if(!Array.isArray(state.sessions))state.sessions=[];
+    if(!state.drafts)state.drafts={};
+    if(!state.checks)state.checks={};
+    const persist=()=>{memory=state;try{localStorage.setItem(STORE_KEY,JSON.stringify(state));storageOK=true}catch(e){storageOK=false}updateStorageText()};
+    let current=null;
+    const $=s=>document.querySelector(s);
+    const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    const num=v=>{const n=parseFloat(String(v).replace(',','.'));return Number.isFinite(n)?n:null};
+    const fmt=n=>Number.isInteger(n)?String(n):String(n).replace('.',',');
+    const dateFmt=t=>new Intl.DateTimeFormat('ru-RU',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(t));
+    const allHistory=id=>state.sessions.slice().sort((a,b)=>b.time-a.time).flatMap(s=>(s.exercises||[]).filter(e=>e.id===id).map(e=>({...e,time:s.time}))); 
+
+    function goalFor(e){
+      const prev=allHistory(e.id)[0];
+      if(!prev)return {previous:'Ещё нет записей.',text:`Старт: выбери вес на ${e.min}–${e.max} чистых повторений с указанным запасом.`,weights:Array(e.sets).fill(''),reps:Array(e.sets).fill(e.min)};
+      const valid=(prev.sets||[]).filter(s=>num(s.weight)!==null&&num(s.reps)!==null&&(s.done!==false));
+      if(!valid.length)return {previous:'В прошлый раз нет завершённых подходов.',text:'Подбери рабочий вес заново.',weights:Array(e.sets).fill(''),reps:Array(e.sets).fill(e.min)};
+      const previous=valid.map(s=>`${fmt(num(s.weight))}×${num(s.reps)}`).join(' · ');
+      const top=valid.length>=e.sets&&valid.slice(0,e.sets).every(s=>num(s.reps)>=e.max);
+      const weights=[],reps=[];
+      for(let i=0;i<e.sets;i++){
+        const source=valid[i]||valid[valid.length-1];
+        weights.push(fmt(num(source.weight)+(top?e.inc:0)));
+        reps.push(top?e.min:Math.min(e.max,num(source.reps)));
+      }
+      let text;
+      if(top){text=`Диапазон закрыт. Попробуй +${fmt(e.inc)} кг и начни снова с ${e.min} повторений.`}
+      else{
+        let idx=reps.findIndex(r=>r<e.max);if(idx<0)idx=0;reps[idx]=Math.min(e.max,reps[idx]+1);
+        text=`Оставь прошлые веса и добавь 1 повтор в подходе №${idx+1}.`;
+      }
+      return {previous,text,weights,reps};
+    }
+
+    function freshDraft(w){
+      const out={};
+      w.main.forEach(e=>{const g=goalFor(e);out[e.id]=Array.from({length:e.sets},(_,i)=>({weight:g.weights[i]||'',reps:'',done:false}))});
+      return out;
+    }
+    function ensureDraft(id){if(!state.drafts[id])state.drafts[id]=freshDraft(workouts[id]);return state.drafts[id]}
+    function todayId(){const d=new Date().getDay();return Object.keys(workouts).find(id=>workouts[id].day===d)||null}
+
+    function renderHome(){
+      const tid=todayId();
+      $('#todayText').textContent=tid?`Сегодня — ${workouts[tid].title}`:'Сегодня — восстановление';
+      $('#workoutGrid').innerHTML=Object.entries(workouts).map(([id,w])=>`<button class="workout-card ${id===tid?'today-card':''}" data-workout="${id}" type="button"><div class="topline"><span class="day">${w.dayName.toUpperCase()} · ${w.duration}</span><span class="stimulus ${w.type}">${w.type==='heavy'?'ТЯЖЁЛЫЙ СТИМУЛ':'УМЕРЕННЫЙ СТИМУЛ'}</span></div><div class="name">${w.short}</div><div class="note"><span>${w.main.length} упражнений · осанка до · растяжка после</span><span class="arrow">↗</span></div></button>`).join('');
+      updateStorageText();
+    }
+
+    function detailHTML(e){return `<details class="details"><summary>Техника · ошибки · замена</summary><div class="detail-grid"><div><b>Как выполнять</b>${esc(e.technique)}</div><div><b>На что смотреть</b>${esc(e.focus)}</div><div><b>Дыхание</b>${esc(e.breath)}</div><div><b>Частые ошибки</b>${esc(e.mistakes)}</div><div><b>Чем заменить</b>${esc(e.replacement)}</div><a class="video" href="${e.video}" target="_blank" rel="noopener">Открыть видео ↗</a></div></details>`}
+    function simpleCard(e,phase){
+      const key=`${current}:${phase}:${e.id}`;const checked=!!state.checks[key];
+      return `<article class="exercise"><div class="exercise-main"><div class="exercise-title"><h3>${esc(e.name)}</h3><span class="dose">${esc(e.dose)}</span></div><p class="cue">${esc(e.cue)}</p><label class="check-row"><input class="done simple-check" type="checkbox" data-key="${esc(key)}" ${checked?'checked':''}><span>Готово</span></label></div>${detailHTML(e)}</article>`;
+    }
+    function mainCard(e,draft){
+      const g=goalFor(e);const sets=draft[e.id]||[];
+      const rows=sets.map((s,i)=>`<div class="set-row"><span class="set-index">${i+1}</span><label class="field"><input class="set-weight" inputmode="decimal" data-ex="${e.id}" data-i="${i}" value="${esc(s.weight)}" aria-label="Вес, подход ${i+1}"><span>кг</span></label><label class="field"><input class="set-reps" inputmode="numeric" data-ex="${e.id}" data-i="${i}" value="${esc(s.reps)}" placeholder="цель ${g.reps[i]??e.min}" aria-label="Повторы, подход ${i+1}"><span>раз</span></label><input class="done set-done" type="checkbox" data-ex="${e.id}" data-i="${i}" ${s.done?'checked':''} aria-label="Подход ${i+1} выполнен"></div>`).join('');
+      return `<article class="exercise"><div class="exercise-main"><div class="exercise-title"><h3>${esc(e.name)}</h3><span class="dose">${e.sets} × ${e.min}–${e.max}</span></div><p class="cue">${esc(e.cue)}</p><p class="reserve">Запас повторов: ${esc(e.reserve)}</p><div class="previous">ПРОШЛЫЙ РАЗ · ${esc(g.previous)}</div><div class="next-goal"><b>СЛЕДУЮЩАЯ ЦЕЛЬ</b><br>${esc(g.text)}</div><div class="sets">${rows}</div><div class="set-actions"><button class="set-btn add-set" data-ex="${e.id}" type="button">+ подход</button>${sets.length>1?`<button class="set-btn remove-set" data-ex="${e.id}" type="button">− последний</button>`:''}</div></div>${detailHTML(e)}</article>`;
+    }
+    function sectionHTML(number,title,meta,cards){return `<section class="section"><div class="section-head"><span class="section-number">${number}</span><div><h2>${title}</h2><p class="section-meta">${meta}</p></div></div>${cards}</section>`}
+    function renderWorkout(){
+      const w=workouts[current],draft=ensureDraft(current);
+      $('#workoutTitle').textContent=w.short;$('#workoutSub').textContent=`${w.dayName} · ${w.duration}`;
+      const prev=state.sessions.filter(s=>s.workoutId===current).sort((a,b)=>b.time-a.time)[0];
+      $('#workoutBody').innerHTML=`${prev?`<p class="medical-note">Последняя сохранённая тренировка: ${dateFmt(prev.time)}</p>`:''}${sectionHTML('01','До тренировки','Один спокойный круг · примерно 8–10 минут',posture.map(e=>simpleCard(e,'pre')).join(''))}${sectionHTML('02','Основная работа','Сначала базовые движения · затем аксессуары',w.main.map(e=>mainCard(e,draft)).join(''))}${sectionHTML('03','После','Мягкая мобильность · примерно 5 минут',stretch.map(e=>simpleCard(e,'post')).join(''))}<button id="saveWorkout" class="finish" type="button">Сохранить тренировку</button><p class="medical-note">Плечо: острая или нарастающая боль, заметный перекос или боль, которая не возвращается к обычному уровню после тренировки, — причина прекратить конкретное движение и обсудить нагрузку со спортивным врачом/физиотерапевтом. Становая: вес растёт только пока старт каждого повтора остаётся одинаковым.</p>`;
+    }
+    function openWorkout(id){current=id;ensureDraft(id);$('#home').classList.remove('active');$('#workout').classList.add('active');renderWorkout();scrollTo(0,0)}
+    function goHome(){$('#workout').classList.remove('active');$('#home').classList.add('active');current=null;renderHome();scrollTo(0,0)}
+    function updateStorageText(){const el=$('#storageText');if(!el)return;el.textContent=storageOK?'Записи остаются только в этом браузере.':'Постоянное хранилище недоступно: записи живут лишь до закрытия страницы.';el.classList.toggle('storage-warning',!storageOK)}
+    let toastTimer;function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600)}
+    function saveSession(){
+      const draft=ensureDraft(current),w=workouts[current];let count=0;
+      const exercises=w.main.map(e=>{const sets=(draft[e.id]||[]).map(s=>({weight:num(s.weight),reps:num(s.reps),done:!!s.done})).filter(s=>s.weight!==null&&s.reps!==null);count+=sets.length;return{id:e.id,name:e.name,sets}}).filter(e=>e.sets.length);
+      if(!count){toast('Введи вес и повторы хотя бы одного подхода.');return}
+      state.sessions.push({id:`${Date.now()}-${Math.random().toString(16).slice(2)}`,time:Date.now(),workoutId:current,exercises});
+      delete state.drafts[current];persist();renderWorkout();toast('Тренировка сохранена. Новые цели рассчитаны.');
+    }
+    function exportData(){const blob=new Blob([JSON.stringify({version:5,exportedAt:new Date().toISOString(),data:state},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`ironform-backup-${new Date().toISOString().slice(0,10)}.json`;a.style.display='none';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+    function importData(file){const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);const incoming=parsed.data||parsed;if(!incoming||!Array.isArray(incoming.sessions))throw new Error('format');state={sessions:incoming.sessions,drafts:incoming.drafts||{},checks:incoming.checks||{}};persist();renderHome();toast('Резервная копия восстановлена.')}catch(e){toast('Не удалось прочитать эту резервную копию.')}};reader.readAsText(file)}
+
+    document.addEventListener('click',e=>{
+      const card=e.target.closest('[data-workout]');if(card){openWorkout(card.dataset.workout);return}
+      if(e.target.closest('#backBtn')){goHome();return}
+      if(e.target.closest('#saveWorkout')){saveSession();return}
+      const add=e.target.closest('.add-set');if(add){const d=ensureDraft(current);const arr=d[add.dataset.ex];const last=arr[arr.length-1]||{weight:'',reps:'',done:false};arr.push({weight:last.weight,reps:'',done:false});persist();renderWorkout();return}
+      const rem=e.target.closest('.remove-set');if(rem){const arr=ensureDraft(current)[rem.dataset.ex];if(arr.length>1)arr.pop();persist();renderWorkout();return}
+      if(e.target.closest('#exportBtn')){exportData();return}
+      if(e.target.closest('#importBtn')){$('#importFile').click();return}
+    });
+    document.addEventListener('input',e=>{
+      if(!current)return;const exid=e.target.dataset.ex,i=Number(e.target.dataset.i);if(!exid||!Number.isInteger(i))return;
+      const row=ensureDraft(current)[exid][i];if(e.target.classList.contains('set-weight'))row.weight=e.target.value;if(e.target.classList.contains('set-reps'))row.reps=e.target.value;persist();
+    });
+    document.addEventListener('change',e=>{
+      if(e.target.classList.contains('set-done')){const row=ensureDraft(current)[e.target.dataset.ex][Number(e.target.dataset.i)];row.done=e.target.checked;persist()}
+      if(e.target.classList.contains('simple-check')){state.checks[e.target.dataset.key]=e.target.checked;persist()}
+      if(e.target.id==='importFile'&&e.target.files[0]){importData(e.target.files[0]);e.target.value=''}
+    });
+    window.addEventListener('error',e=>{console.error(e.error||e.message)});
+    renderHome();
+  })();
+  </script>
+</body>
+</html>
